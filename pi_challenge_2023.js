@@ -17,45 +17,77 @@ function solution(P, Q) {
     }
   }
 
+  console.log('commonFrequency')
   console.log(commonFrequency)
 
   const result = []
 
-  function helper(prefix = "", j = 0) {
+  function helper(commonFrequency, frequencyP, frequencyQ, prefix = "", j = 0) {
     let S = prefix;
+    const commonFrequencyCopy = {...commonFrequency}, frequencyPCopy = {...frequencyP}, frequencyQCopy = {...frequencyQ}
 
     for (let i = j; i < P.length; i++) {
-      // Same priority leads to branching
-      if (commonFrequency[P[i]] === commonFrequency[Q[i]] && P[i] !== Q[i]) {
-        const newPrefixP = S + P[i];
-        helper(newPrefixP, i + 1);
+      if (S.includes(P[i])) {
+        S += P[i];
+        frequencyQCopy[Q[i]]--;
+        commonFrequencyCopy[Q[i]]--;
+        continue;
+      }
+      if (S.includes(Q[i])){
+        S += Q[i];
+        frequencyQCopy[P[i]]--;
+        commonFrequencyCopy[P[i]]--;
+        continue;
       }
 
-      // If more frequent P was not chosen before, then branch
-      // OR
-      // If less frequent Q is present in both strings and P is not, then branch
-      if (commonFrequency[P[i]] > commonFrequency[Q[i]]) {
-        console.log(P[i])
-        if ((P.slice(0, i).includes(P[i]) && !S.includes(P[i])) || (frequencyP[Q[i]] && !frequencyQ[P[i]])) {
-          console.log("loop")
-          const newPrefixP = S + Q[i];
-          helper(newPrefixP, i + 1);
-          return null;
-        } else {
-          console.log("add")
-          S += P[i]
-        }
-      // If more frequent Q was not chosen before, then branch
-      // OR
-      // If less frequent P is present in both strings and Q is not, then branch
-      } else {
-        if ((Q.slice(0, i).includes(Q[i]) && !S.includes(Q[i])) || (frequencyQ[P[i]] && !frequencyP[Q[i]])) {
+      // Same priority leads to branching
+      if (commonFrequencyCopy[P[i]] === commonFrequencyCopy[Q[i]]) {
+        if (P[i] !== Q[i]) {
           const newPrefixP = S + P[i];
-          helper(newPrefixP, i + 1);
-          return null;
-        } else {
-          S += Q[i]
+          frequencyQCopy[Q[i]]--;
+          commonFrequencyCopy[Q[i]]--;
+          helper(commonFrequencyCopy, frequencyPCopy, frequencyQCopy, newPrefixP, i + 1);
+
+          const newPrefixQ = S + Q[i];
+          frequencyPCopy[P[i]]--;
+          commonFrequencyCopy[P[i]]--;
+          helper(commonFrequencyCopy, frequencyPCopy, frequencyQCopy, newPrefixQ, i + 1);
+          // return null;
         }
+        S += Q[i];
+        // return null;
+      }
+
+      // BRANCH IF less frequent Q is present in both strings while P is not
+      // Otherwise use more frequent P
+      if (commonFrequencyCopy[P[i]] > commonFrequencyCopy[Q[i]]) {
+        if (frequencyPCopy[Q[i]] && !frequencyQCopy[P[i]]) {
+          const newPrefixQ = S + Q[i];
+          frequencyPCopy[P[i]]--;
+          commonFrequencyCopy[P[i]]--;
+          helper(commonFrequencyCopy, frequencyPCopy, frequencyQCopy, newPrefixQ, i + 1);
+          // return null; // Maybe remove.
+        }
+
+        // Add P and remove unused Q from frequency
+        S += P[i]
+        frequencyQCopy[Q[i]]--;
+        commonFrequencyCopy[Q[i]]--;
+      }
+        // BRANCH IF less frequent P is present in both strings while Q is not
+      // Otherwise use more frequent Q
+      else {
+        if (frequencyQCopy[P[i]] && !frequencyPCopy[Q[i]]) {
+          const newPrefixP = S + P[i];
+          frequencyQCopy[Q[i]]--;
+          commonFrequencyCopy[Q[i]]--;
+          helper(commonFrequencyCopy, frequencyPCopy, frequencyQCopy, newPrefixP, i + 1);
+          // return null; // Maybe remove.
+        }
+        // Add Q and remove unused P from frequency
+        S += Q[i];
+        frequencyPCopy[P[i]]--;
+        commonFrequencyCopy[P[i]]--;
       }
     }
 
@@ -64,18 +96,26 @@ function solution(P, Q) {
     return result;
   }
 
-  helper()
+  helper(commonFrequency, frequencyP, frequencyQ)
   return Math.min(...result);
 }
 
-const testCases = [["dddabc", "abcefg"]]
+
 // const P = "dddabc", Q = "abcefg" // abcabc - expected (min distinct letters num equals 3)
-const P = "aaaacbcddd", Q = "bbbbacdaaa" // aaaacccaaa / aaaaaccaaa- expected (min distinct letters num equals 2)
+const P = "aaaacbcddd", Q = "bbbbacdaaa" // aaaaaccaaa- expected
 console.log(solution(P, Q))
-/*testCases.forEach((test) => {
+
+const testCases = [
+  ["dddabc", "abcefg"],
+  ["aaaacbcddd", "bbbbacdaaa"],
+  ["aabbbddeefggi", "dhcgjgifjgijj"],
+  ["xxyzabcmnopqrstw", "xyzabcmnopqrstww"]
+]
+
+/* testCases.forEach((test) => {
   console.log("input:", test)
   console.log("min distinct:", solution(P, Q))
-})*/
+}) */
 
 
 /*
