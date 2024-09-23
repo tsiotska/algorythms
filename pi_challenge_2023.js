@@ -1,171 +1,113 @@
+/*
+* Time complexity O(2**A * N)
+* Performance 25%
+* Correctness 85%
+* Time spent - 9 hours
+*/
+
 function solution(P, Q) {
-  console.log("P")
-  console.log(P)
-  console.log("Q")
-  console.log(Q)
-  const commonFrequency = {};
-  const frequencyP = {};
-  const frequencyQ = {};
+  if (P === Q) return new Set(P).size
+
+  const commonFrequency = new Map();
+  const frequencyP = new Map();
+  const frequencyQ = new Map();
 
   for (let i = 0; i < P.length; i++) {
-    frequencyP[P[i]] = (frequencyP[P[i]] || 0) + 1;
-    frequencyQ[Q[i]] = (frequencyQ[Q[i]] || 0) + 1;
-    if (P[i] === Q[i]) commonFrequency[P[i]] = (commonFrequency[P[i]] || 0) + 1;
+    frequencyP.set(P[i], (frequencyP.get(P[i]) || 0) + 1)
+    frequencyQ.set(Q[i], (frequencyQ[Q[i]] || 0) + 1);
+    if (P[i] === Q[i]) commonFrequency.set(P[i], (commonFrequency.get(P[i]) || 0) + 1);
     else {
-      commonFrequency[P[i]] = (commonFrequency[P[i]] || 0) + 1;
-      commonFrequency[Q[i]] = (commonFrequency[Q[i]] || 0) + 1;
+      commonFrequency.set(P[i], (commonFrequency.get(P[i]) || 0) + 1);
+      commonFrequency.set(Q[i], (commonFrequency.get(Q[i]) || 0) + 1);
     }
   }
 
-  console.log('commonFrequency')
-  console.log(commonFrequency)
-
   const result = []
 
-  function helper(commonFrequency, frequencyP, frequencyQ, prefix = "", j = 0) {
-    let S = prefix;
-    const commonFrequencyCopy = {...commonFrequency}, frequencyPCopy = {...frequencyP}, frequencyQCopy = {...frequencyQ}
+  function branch(S, addLetter, unusedLetter, frequencyPCopy, frequencyQCopy, commonFrequencyCopy, i) {
+    const newSet = new Set(S);
+    newSet.add(addLetter);
+    frequencyPCopy.set(unusedLetter, frequencyPCopy.get(unusedLetter) - 1);
+    commonFrequencyCopy.set(unusedLetter, commonFrequencyCopy.get(unusedLetter) - 1);
+    helper(commonFrequencyCopy, frequencyPCopy, frequencyQCopy, S, i + 1);
+  }
+
+  function helper(commonFrequency, frequencyP, frequencyQ, S, j = 0) {
+    const commonFrequencyCopy = new Map(commonFrequency),
+      frequencyPCopy = new Map(frequencyP),
+      frequencyQCopy = new Map(frequencyQ);
 
     for (let i = j; i < P.length; i++) {
-      if (S.includes(P[i])) {
-        S += P[i];
-        frequencyQCopy[Q[i]]--;
-        commonFrequencyCopy[Q[i]]--;
+      // Priority for already added letters
+      if (S.has(P[i])) {
+        S.add(P[i]);
+        frequencyQCopy.set(Q[i], frequencyQCopy.get(Q[i]) - 1);
+        commonFrequencyCopy.set(Q[i], commonFrequencyCopy.get(Q[i]) - 1);
         continue;
       }
-      if (S.includes(Q[i])){
-        S += Q[i];
-        frequencyQCopy[P[i]]--;
-        commonFrequencyCopy[P[i]]--;
+      if (S.has(Q[i])) {
+        S.add(Q[i]);
+        frequencyQCopy.set(P[i], frequencyQCopy.get(P[i]) - 1);
+        commonFrequencyCopy.set(P[i], commonFrequencyCopy.get(P[i]) - 1);
         continue;
       }
 
       // Same priority leads to branching
-      if (commonFrequencyCopy[P[i]] === commonFrequencyCopy[Q[i]]) {
+      if (commonFrequencyCopy.get(P[i]) === commonFrequencyCopy.get(Q[i])) {
         if (P[i] !== Q[i]) {
-          const newPrefixP = S + P[i];
-          frequencyQCopy[Q[i]]--;
-          commonFrequencyCopy[Q[i]]--;
-          helper(commonFrequencyCopy, frequencyPCopy, frequencyQCopy, newPrefixP, i + 1);
-
-          const newPrefixQ = S + Q[i];
-          frequencyPCopy[P[i]]--;
-          commonFrequencyCopy[P[i]]--;
-          helper(commonFrequencyCopy, frequencyPCopy, frequencyQCopy, newPrefixQ, i + 1);
-          // return null;
+          branch(S, P[i], Q[i], frequencyPCopy, frequencyQCopy, commonFrequencyCopy, i);
+          branch(S, Q[i], P[i], frequencyPCopy, frequencyQCopy, commonFrequencyCopy, i);
+          return null;
         }
-        S += Q[i];
-        // return null;
+
+        S.add(Q[i]);
+        continue;
       }
 
       // BRANCH IF less frequent Q is present in both strings while P is not
       // Otherwise use more frequent P
-      if (commonFrequencyCopy[P[i]] > commonFrequencyCopy[Q[i]]) {
-        if (frequencyPCopy[Q[i]] && !frequencyQCopy[P[i]]) {
-          const newPrefixQ = S + Q[i];
-          frequencyPCopy[P[i]]--;
-          commonFrequencyCopy[P[i]]--;
-          helper(commonFrequencyCopy, frequencyPCopy, frequencyQCopy, newPrefixQ, i + 1);
-          // return null; // Maybe remove.
+      if (commonFrequencyCopy.get(P[i]) > commonFrequencyCopy.get(Q[i])) {
+        if (frequencyPCopy.get(Q[i]) && !frequencyQCopy.get(P[i])) {
+          branch(S, Q[i], P[i], frequencyPCopy, frequencyQCopy, commonFrequencyCopy, i);
+          return null;
         }
 
         // Add P and remove unused Q from frequency
-        S += P[i]
-        frequencyQCopy[Q[i]]--;
-        commonFrequencyCopy[Q[i]]--;
+        S.add(P[i]);
+        frequencyQCopy.set(Q[i], frequencyQCopy.get(Q[i]) - 1);
+        commonFrequencyCopy.set(Q[i], commonFrequencyCopy.get(Q[i]) - 1);
       }
         // BRANCH IF less frequent P is present in both strings while Q is not
       // Otherwise use more frequent Q
       else {
-        if (frequencyQCopy[P[i]] && !frequencyPCopy[Q[i]]) {
-          const newPrefixP = S + P[i];
-          frequencyQCopy[Q[i]]--;
-          commonFrequencyCopy[Q[i]]--;
-          helper(commonFrequencyCopy, frequencyPCopy, frequencyQCopy, newPrefixP, i + 1);
-          // return null; // Maybe remove.
+        if (frequencyQCopy.get(P[i]) && !frequencyPCopy.get(Q[i])) {
+          branch(S, P[i], Q[i], frequencyPCopy, frequencyQCopy, commonFrequencyCopy, i);
+          return null;
         }
         // Add Q and remove unused P from frequency
-        S += Q[i];
-        frequencyPCopy[P[i]]--;
-        commonFrequencyCopy[P[i]]--;
+        S.add(Q[i]);
+        frequencyPCopy.set(P[i], frequencyPCopy.get(P[i]) - 1);
+        commonFrequencyCopy.set(P[i], commonFrequencyCopy.get(P[i]) - 1);
       }
     }
-
     console.log(S)
-    result.push(new Set(Array.from(S)).size)
-    return result;
+    result.push(S.size)
   }
 
-  helper(commonFrequency, frequencyP, frequencyQ)
+  helper(commonFrequency, frequencyP, frequencyQ, new Set())
   return Math.min(...result);
 }
 
-const P = "aaabbbcccdeh", Q = "befceidejehi" // - expected
-console.log(solution(P, Q))
-
 const testCases = [
   ["dddabc", "abcefg"], // abcabc - expected (min distinct letters num equals 3)
-  ["aaaacbcddd", "bbbbacdaaa"],
-  ["aaabbbcccdeh", "befceidejehi"],
+  ["aaaacbcddd", "bbbbacdaaa"], // aaaaaccaaa - expected (2)
+  ["abcdfghiklmnpq", "bcdeghijlmnoqr"], // bbddggiillnnqq - expected (7)
+  ["aaabbbcccdeh", "befceidejehi"], // expected (4) TODO: cover case
+  ["aaaabddddefi", "cghjgeefhjgj"], // aaaagddddjgj - expected (5) TODO: cover case
   ["aabbbddeefggi", "dhcgjgifjgijj"]
 ]
 
  testCases.forEach((test) => {
   console.log("input:", test)
-  console.log("min distinct:", solution(P, Q))
+  console.log("min distinct:", solution(test[0], test[1]))
 })
-
-
-/*
-function solution(P, Q) {
-  console.log("P")
-  console.log(P)
-  console.log("Q")
-  console.log(Q)
-  const commonFrequency = {};
-  const frequencyP = {};
-  const frequencyQ = {};
-
-  for(let i = 0; i < P.length; i++) {
-    frequencyP[P[i]] = (frequencyP[P[i]] || 0) + 1;
-    frequencyQ[Q[i]] = (frequencyQ[Q[i]] || 0) + 1;
-    if(P[i] === Q[i]) commonFrequency[P[i]] = (commonFrequency[P[i]] || 0) + 1;
-    else {
-      commonFrequency[P[i]] = (commonFrequency[P[i]] || 0) + 1;
-      commonFrequency[Q[i]] = (commonFrequency[Q[i]] || 0) + 1;
-    }
-  }
-
-  console.log(commonFrequency)
-
-  const result = []
-
-  function helper(prefix = "", j = 0) {
-    let S = prefix;
-    for(let i = j; i < P.length; i++) {
-      // Same priority leads to branching
-      if(commonFrequency[P[i]] === commonFrequency[Q[i]] && P[i] !== Q[i]) {
-        const newPrefixP = S + P[i];
-        helper(newPrefixP, i + 1);
-      }
-      // If letter is less frequent but is  present in both strings then branch
-      if(commonFrequency[P[i]] > commonFrequency[Q[i]] && frequencyP[Q[i]] && !frequencyQ[P[i]]) {
-        const newPrefixP = S + Q[i];
-        helper(newPrefixP, i + 1);
-        return null;
-      } else if (commonFrequency[Q[i]] > commonFrequency[P[i]] && frequencyQ[P[i]] && !frequencyP[Q[i]]) {
-        const newPrefixP = S + P[i];
-        helper(newPrefixP, i + 1);
-        return null;
-      }
-      S += commonFrequency[P[i]] > commonFrequency[Q[i]] ? P[i] : Q[i]
-    }
-
-    console.log(S)
-    result.push(new Set(Array.from(S)).size)
-    return result;
-  }
-
-  helper()
-  return Math.min(...result);
-}*/
