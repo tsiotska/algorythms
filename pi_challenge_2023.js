@@ -100,22 +100,20 @@ function solution(P, Q) {
   return Math.min(...result);
 }
 
-
-// const P = "dddabc", Q = "abcefg" // abcabc - expected (min distinct letters num equals 3)
-const P = "aaaacbcddd", Q = "bbbbacdaaa" // aaaaaccaaa- expected
+const P = "aaabbbcccdeh", Q = "befceidejehi" // - expected
 console.log(solution(P, Q))
 
 const testCases = [
-  ["dddabc", "abcefg"],
+  ["dddabc", "abcefg"], // abcabc - expected (min distinct letters num equals 3)
   ["aaaacbcddd", "bbbbacdaaa"],
-  ["aabbbddeefggi", "dhcgjgifjgijj"],
-  ["xxyzabcmnopqrstw", "xyzabcmnopqrstww"]
+  ["aaabbbcccdeh", "befceidejehi"],
+  ["aabbbddeefggi", "dhcgjgifjgijj"]
 ]
 
-/* testCases.forEach((test) => {
+ testCases.forEach((test) => {
   console.log("input:", test)
   console.log("min distinct:", solution(P, Q))
-}) */
+})
 
 
 /*
