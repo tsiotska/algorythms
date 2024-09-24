@@ -1,6 +1,5 @@
 /* Singleton is a class which can be instantiated once, and can be accessed globally. */
 
-
 class Singleton {
   constructor() {
     if (Singleton.instance) {
