@@ -3,6 +3,8 @@ Given an array of integers and a target integer,
 your task is to return the indices of two numbers in the array that add up to the target.
 */
 
+// https://leetcode.com/problems/two-sum/description/
+
 const twoSum = (numbers, target) => {
   const numsMap = new Map();
 
