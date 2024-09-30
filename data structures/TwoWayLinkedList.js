@@ -1,5 +1,5 @@
 /*
-Doubly Linked List (DLL) is a type of linked list where each node contains a reference to both the next and the previous node.
+Doubly Linked List (DLL) is a type of linked list where each node contains a reference to both the next and the previousNodeMap node.
 This allows traversal of the list in both directions, unlike a singly linked list which can only be traversed forward.
 */
 
