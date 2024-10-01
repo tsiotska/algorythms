@@ -11,13 +11,12 @@ function ListNode(val, next) {
   this.next = (next === undefined ? null : next)
 }
 
-var addTwoNumbers = function (l1, l2) {
+const addTwoNumbers = (l1, l2) => {
   const result = new ListNode(0)
 
   function helper(resultNode, l1Next, l2Next, rest = 0) {
     let {val: l1Val = 0} = l1Next ?? {};
     let {val: l2Val = 0} = l2Next ?? {};
-
 
     let value = l1Val + l2Val + rest;
     const withRest = Math.floor(value / 10);
@@ -29,9 +28,28 @@ var addTwoNumbers = function (l1, l2) {
       resultNode.next = new ListNode(0);
       helper(resultNode.next, l1Next?.next, l2Next?.next, withRest);
     }
-    console.log(resultNode.val);
   }
 
   helper(result, l1, l2);
   return result;
 };
+
+const testCases = [
+  [
+    new ListNode(2, new ListNode(4, new ListNode(3))),
+    new ListNode(5, new ListNode(6, new ListNode(4)))
+  ],
+  [
+    new ListNode(0),
+    new ListNode(0)
+  ],
+  [
+    new ListNode(9, new ListNode(9, new ListNode(9, new ListNode(9)))),
+    new ListNode(9, new ListNode(9, new ListNode(9)))
+  ],
+]
+
+testCases.forEach((test) => {
+  console.log("input:", test)
+  console.log("Result:", addTwoNumbers(test[0], test[1]))
+})
