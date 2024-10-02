@@ -21,33 +21,37 @@ const isValid = (board, row, col, num) => {
 };
 
 const solveSudoku = (board) => {
-  // Backtracking function to solve the board
-  const backtrackingHelper = (board, nextRow, nextCol) => {
-    for (let row = nextRow; row < 9; row++) {
-      for (let col =  (row === nextRow ? nextCol : 0); col < 9; col++) {
-        // Find an empty cell
-        if (board[row][col] === ".") {
-          // Attempt to find num that is not present in row/col/grid
-          for (let num = 1; num <= 9; num++) {
-            const stringifiedNum = num.toString();
+  // Backtracking function
+  const backtrackingHelper = (row, col) => {
+    // If we reach the end of the board it's solved
+    if (row === 9) return true;
 
-            if (isValid(board, row, col, stringifiedNum)) {
-              board[row][col] = stringifiedNum;
+    const [nextRow, nextCol] = col + 1 === 9 ? [row + 1, 0] : [row, col + 1];
 
-              const [nextRow, nextCol] = col + 1 === 9 ? [row + 1, 0] : [row, col + 1];
-              if (backtrackingHelper(board, nextRow, nextCol)) return true;
-              board[row][col] = ".";
-            }
-          }
-          // If not found any match then backtrack
-          return false;
-        }
+    // If the current cell is already filled, move to the next cell
+    if (board[row][col] !== ".") {
+      return backtrackingHelper(nextRow, nextCol);
+    }
+
+    // Attempt to place numbers in the empty cell
+    for (let num = 1; num <= 9; num++) {
+      const stringifiedNum = num.toString();
+      if (isValid(board, row, col, stringifiedNum)) {
+        board[row][col] = stringifiedNum;
+
+        // Attempt to solve the next cell
+        if (backtrackingHelper(nextRow, nextCol)) return true;
+
+        // If the next solution can't be found, undo and continue loop
+        board[row][col] = ".";
       }
     }
-    return true;  // Solution found
+
+    // Backtracking if no solution
+    return false;
   };
 
-  backtrackingHelper(board, 0, 0);
+  backtrackingHelper(0, 0);
 };
 
 const printBoard = (board) => {
