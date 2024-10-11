@@ -25,5 +25,4 @@ const findMedianSortedArrays = (nums1, nums2) => {
 }
 
 const nums1 = [3, 6, 7, 10], nums2 = [2, 4, 6, 11, 12];
-// const nums1 = [0, 0], nums2 = [0, 0];
 console.log(findMedianSortedArrays(nums1, nums2));
