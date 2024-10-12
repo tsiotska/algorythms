@@ -15,27 +15,26 @@ const isMatch = (string, pattern) => {
 
   let patternIndex = 0;
   for (let index in string) {
-    const currentPattern = pattern[patternIndex]
-    if (currentPattern === "*") {
-      if (string[index - 1] === string[index]) {
+    if (pattern[patternIndex] === "*") {
+      if (string[index - 1] === string[index] || (pattern[patternIndex - 1] === ".")) {
         continue;
       }
       patternIndex++;
     }
 
-    if (currentPattern === ".") {
+    if (pattern[patternIndex] === ".") {
       patternIndex++;
       continue;
     }
 
-    if (currentPattern !== string[index]) {
+    if (pattern[patternIndex] !== string[index] && pattern[patternIndex + 1] !== "*") {
       return false;
+    } else {
+      patternIndex++;
     }
-
-    patternIndex++;
   }
 
-  return true;
+  return patternIndex === pattern.length - 1;
 }
 
 const s = "aaadc", p = "a*.c";
