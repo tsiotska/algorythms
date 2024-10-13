@@ -13,29 +13,38 @@ there will be a previous valid character to match.
 const isMatch = (string, pattern) => {
   if (!pattern.includes("*") && pattern.length !== string.length) return false
 
-  let patternIndex = 0;
-  for (let index in string) {
-    if (pattern[patternIndex] === "*") {
-      if (string[index - 1] === string[index] || (pattern[patternIndex - 1] === ".")) {
-        continue;
-      }
-      patternIndex++;
-    }
+  let index = 0;
+  for (let patternIndex = 0; patternIndex < pattern.length; patternIndex++) {
+    const currentPattern = pattern[patternIndex];
 
-    if (pattern[patternIndex] === ".") {
-      patternIndex++;
+    if (currentPattern === "*") {
+      // Same symbol or any symbol 1 or more times
+      while (string[index - 1] === string[index] || (pattern[patternIndex - 1] === "." && !pattern[patternIndex + 1])) {
+        index++;
+      }
+      // Skip it as 0 times. Continue with the same symbol.
       continue;
     }
 
-    if (pattern[patternIndex] !== string[index] && pattern[patternIndex + 1] !== "*") {
+    if (currentPattern === ".") {
+      index++;
+      continue;
+    }
+
+    // Take next symbol if pattern strictly equals
+    if (currentPattern === string[index]) {
+      index++;
+    } else if (pattern[patternIndex + 1] !== "*") {
       return false;
-    } else {
-      patternIndex++;
     }
   }
 
-  return patternIndex === pattern.length - 1;
+  return index === string.length;
 }
 
-const s = "aaadc", p = "a*.c";
+// const s = "mississippi", p = "mis*is*ip*."
+// const s = "aaadad", p = "a*d";
+// const s = "aab", p = "c*a*b";
+const s = "abcdaaabc", p = ".*aa.*";
+
 console.log(isMatch(s, p));
