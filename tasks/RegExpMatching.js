@@ -10,41 +10,44 @@ It is guaranteed for each appearance of the character '*',
 there will be a previous valid character to match.
 */
 
-const isMatch = (string, pattern) => {
-  if (!pattern.includes("*") && pattern.length !== string.length) return false
+const isMatch = (s, p) => {
+  const m = s.length, n = p.length;
+  // Create a DP table initialized to false
+  const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(false));
 
-  let index = 0;
-  for (let patternIndex = 0; patternIndex < pattern.length; patternIndex++) {
-    const currentPattern = pattern[patternIndex];
+  // Base case: empty string matches empty pattern
+  dp[0][0] = true;
 
-    if (currentPattern === "*") {
-      // Same symbol or any symbol 1 or more times
-      while (string[index - 1] === string[index] || (pattern[patternIndex - 1] === "." && !pattern[patternIndex + 1])) {
-        index++;
-      }
-      // Skip it as 0 times. Continue with the same symbol.
-      continue;
-    }
-
-    if (currentPattern === ".") {
-      index++;
-      continue;
-    }
-
-    // Take next symbol if pattern strictly equals
-    if (currentPattern === string[index]) {
-      index++;
-    } else if (pattern[patternIndex + 1] !== "*") {
-      return false;
+  // Handle patterns that can match the empty string (like a*, a*b*c*)
+  for (let j = 2; j <= n; j++) {
+    if (p[j - 1] === '*') {
+      dp[0][j] = dp[0][j - 2];
     }
   }
 
-  return index === string.length;
-}
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (p[j - 1] === s[i - 1] || p[j - 1] === '.') {
+        // If characters match or pattern has '.', carry over the diagonal value
+        dp[i][j] = dp[i - 1][j - 1];
+      } else if (p[j - 1] === '*') {
+        // If pattern has '*', check two cases:
+        // 1. Ignore the 'x*' part (i.e., zero occurrences)
+        dp[i][j] = dp[i][j - 2];
+        // 2. Use the preceding element if it matches current character in s
+        if (p[j - 2] === s[i - 1] || p[j - 2] === '.') {
+          dp[i][j] = dp[i][j] || dp[i - 1][j];
+        }
+      }
+    }
+  }
 
-// const s = "mississippi", p = "mis*is*ip*."
+  return dp[m][n];
+};
+
+const s = "mississippi", p = "mis*is*ip*."
 // const s = "aaadad", p = "a*d";
 // const s = "aab", p = "c*a*b";
-const s = "abcdaaabc", p = ".*aa.*";
+// const s = "abcaadaaabd", p = ".*aa.*d";
 
 console.log(isMatch(s, p));
